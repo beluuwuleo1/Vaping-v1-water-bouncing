@@ -1,7 +1,6 @@
 /*
- * SkidBounce Hacked Client
- * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge, Forked from LiquidBounce.
- * https://github.com/SkidBounce/SkidBounce/
+ * Vape v4
+ * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  */
 package net.ccbluex.liquidbounce
 
@@ -53,12 +52,12 @@ object LiquidBounce {
      *
      * This has all of the basic information.
      */
-    const val CLIENT_NAME = "SkidBounce"
-    const val CLIENT_AUTHOR = "ManInMyVan"
-    const val CLIENT_CLOUD = "https://cloud.liquidbounce.net/LiquidBounce"
-    const val CLIENT_WEBSITE = "skidbounce.github.io"
+    const val CLIENT_NAME = "Vape v4"
+    const val CLIENT_AUTHOR = "Manthe"
+    const val CLIENT_CLOUD = "https://www.vape.gg/"
+    const val CLIENT_WEBSITE = "vape.gg"
 
-    val clientVersionText = gitInfo["git.build.version"]?.toString() ?: "unknown"
+    val clientVersionText = gitInfo["git.build.version"]?.toString() ?: "4.0"
     val clientCommit = gitInfo["git.commit.id.abbrev"]?.let { "git-$it" } ?: "unknown"
 
     /**
