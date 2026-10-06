@@ -1,14 +1,12 @@
 /*
- * SkidBounce Hacked Client
- * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge, Forked from LiquidBounce.
- * https://github.com/SkidBounce/SkidBounce/
+ * Vape v4
+ * A free open source mixin-based injection hacked client for Minecraft using Minecraft Forge.
  */
 package net.ccbluex.liquidbounce.ui.client.hud.element.elements
 
 import net.ccbluex.liquidbounce.LiquidBounce.clientCommit
 import net.ccbluex.liquidbounce.LiquidBounce.CLIENT_AUTHOR
 import net.ccbluex.liquidbounce.LiquidBounce.CLIENT_NAME
-import net.ccbluex.liquidbounce.LiquidBounce.clientCommit
 import net.ccbluex.liquidbounce.LiquidBounce.clientVersionText
 import net.ccbluex.liquidbounce.features.module.modules.combat.KillAura.blockStatus
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
@@ -65,7 +63,7 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F, side: Side = S
 
             text.displayString = "%clientName%"
             text.shadow = true
-            text.color = Color(0, 111, 255)
+            text.color = Color(0, 0, 0)
 
             return text
         }
@@ -78,27 +76,27 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F, side: Side = S
     private val textColorMode by ListValue("Text-Color", arrayOf("Custom", "Random", "Rainbow", "Gradient"), "Custom")
 
     private var alpha by IntValue("Alpha", 255, 0..255) { textColorMode != "Rainbow" }
-    private var red by IntValue("Red", 255, 0..255) { textColorMode == "Custom" && alpha > 0 }
-    private var green by IntValue("Green", 255, 0..255) { textColorMode == "Custom" && alpha > 0 }
-    private var blue by IntValue("Blue", 255, 0..255) { textColorMode == "Custom" && alpha > 0 }
+    private var red by IntValue("Red", 0, 0..255) { textColorMode == "Custom" && alpha > 0 }
+    private var green by IntValue("Green", 0, 0..255) { textColorMode == "Custom" && alpha > 0 }
+    private var blue by IntValue("Blue", 0, 0..255) { textColorMode == "Custom" && alpha > 0 }
 
     private val backgroundAlpha by IntValue("BackgroundAlpha", 0, 0..255)
     private val backgroundRed by IntValue("BackgroundRed", 0, 0..255) { backgroundAlpha > 0 }
     private val backgroundGreen by IntValue("BackgroundGreen", 0, 0..255) { backgroundAlpha > 0 }
     private val backgroundBlue by IntValue("BackgroundBlue", 0, 0..255) { backgroundAlpha > 0 }
 
-    // TODO: Make Color picker to fix this mess :/
-    private val gradientTextRed1 by FloatValue("Text-Gradient-R1", 255f, 0f..255f) { textColorMode == "Gradient" }
+    // Color Pickers
+    private val gradientTextRed1 by FloatValue("Text-Gradient-R1", 0f, 0f..255f) { textColorMode == "Gradient" }
     private val gradientTextGreen1 by FloatValue("Text-Gradient-G1", 0f, 0f..255f) { textColorMode == "Gradient" }
     private val gradientTextBlue1 by FloatValue("Text-Gradient-B1", 0f, 0f..255f) { textColorMode == "Gradient" }
 
     private val gradientTextRed2 by FloatValue("Text-Gradient-R2", 0f, 0f..255f) { textColorMode == "Gradient" }
-    private val gradientTextGreen2 by FloatValue("Text-Gradient-G2", 255f, 0f..255f) { textColorMode == "Gradient" }
+    private val gradientTextGreen2 by FloatValue("Text-Gradient-G2", 0f, 0f..255f) { textColorMode == "Gradient" }
     private val gradientTextBlue2 by FloatValue("Text-Gradient-B2", 0f, 0f..255f) { textColorMode == "Gradient" }
 
     private val gradientTextRed3 by FloatValue("Text-Gradient-R3", 0f, 0f..255f) { textColorMode == "Gradient" }
     private val gradientTextGreen3 by FloatValue("Text-Gradient-G3", 0f, 0f..255f) { textColorMode == "Gradient" }
-    private val gradientTextBlue3 by FloatValue("Text-Gradient-B3", 255f, 0f..255f) { textColorMode == "Gradient" }
+    private val gradientTextBlue3 by FloatValue("Text-Gradient-B3", 0f, 0f..255f) { textColorMode == "Gradient" }
 
     private val gradientTextRed4 by FloatValue("Text-Gradient-R4", 0f, 0f..255f) { textColorMode == "Gradient" }
     private val gradientTextGreen4 by FloatValue("Text-Gradient-G4", 0f, 0f..255f) { textColorMode == "Gradient" }
@@ -121,7 +119,7 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F, side: Side = S
     private val display: String
         get() {
             val textContent = if (displayString.isEmpty() && !editMode)
-                "Text Element"
+                "Vape v4"
             else
                 displayString
 
@@ -200,6 +198,134 @@ class Text(x: Double = 10.0, y: Double = 10.0, scale: Float = 1F, side: Side = S
 
                         if (replacement != null) {
                             result.append(replacement)
+                            lastPercent = -1
+                            continue
+                        }
+                    }
+                    result.append(str, lastPercent, i)
+                }
+                lastPercent = i
+            } else if (lastPercent == -1) {
+                result.append(str[i])
+            }
+        }
+
+        if (lastPercent != -1) {
+            result.append(str, lastPercent, str.length)
+        }
+
+        return result.toString()
+    }
+
+    /**
+     * Draw element
+     */
+    override fun drawElement(): Border {
+        val rainbow = textColorMode == "Rainbow"
+        val gradient = textColorMode == "Gradient"
+
+        if (backgroundAlpha > 0) drawRoundedRect2(-2F, -2F, font.getStringWidth(displayText) + 2F, font.FONT_HEIGHT + 0F, Color(backgroundRed, backgroundGreen, backgroundBlue, backgroundAlpha), roundedRectRadius)
+
+        val gradientOffset = System.currentTimeMillis() % 10000 / 10000F
+        val gradientX = if (gradientX == 0f) 0f else 1f / gradientX
+        val gradientY = if (gradientY == 0f) 0f else 1f / gradientY
+
+        GradientFontShader.apply {
+            color1 = floatArrayOf(
+                gradientTextRed1 / 255.0f,
+                gradientTextGreen1 / 255.0f,
+                gradientTextBlue1 / 255.0f,
+                1.0f
+            )
+            color2 = floatArrayOf(
+                gradientTextRed2 / 255.0f,
+                gradientTextGreen2 / 255.0f,
+                gradientTextBlue2 / 255.0f,
+                1.0f
+            )
+            color3 = floatArrayOf(
+                gradientTextRed3 / 255.0f,
+                gradientTextGreen3 / 255.0f,
+                gradientTextBlue3 / 255.0f,
+                1.0f
+            )
+            color4 = floatArrayOf(
+                gradientTextRed4 / 255.0f,
+                gradientTextGreen4 / 255.0f,
+                gradientTextBlue4 / 255.0f,
+                1.0f
+            )
+
+            begin(
+                textColorMode == "Gradient",
+                gradientX,
+                gradientY,
+                gradientOffset
+            ).use {
+                RainbowFontShader.begin(
+                    rainbow,
+                    if (rainbowX == 0f) 0f else 1f / rainbowX,
+                    if (rainbowY == 0f) 0f else 1f / rainbowY,
+                    System.currentTimeMillis() % 10000 / 10000F
+                ).use {
+                    font.drawString(
+                        displayText, 0F, 0F, if (rainbow)
+                            0 else if (gradient) 0 else color.rgb, shadow
+                    )
+
+                    if (editMode && mc.currentScreen is GuiHudDesigner && editTicks <= 40)
+                        font.drawString(
+                            "_", font.getStringWidth(displayText) + 2F,
+                            0F, if (rainbow) ColorUtils.rainbow(400000000L).rgb else if (gradient) 0 else color.rgb , shadow
+                        )
+                }
+            }
+        }
+
+        if (editMode && mc.currentScreen !is GuiHudDesigner) {
+            editMode = false
+            updateElement()
+        }
+
+        return Border(-2F, -2F, font.getStringWidth(displayText) + 2F, font.FONT_HEIGHT.toFloat())
+    }
+
+    override fun updateElement() {
+        editTicks += 5
+        if (editTicks > 80) editTicks = 0
+
+        displayText = if (editMode) displayString else display
+    }
+
+    override fun handleMouseClick(x: Double, y: Double, mouseButton: Int) {
+        if (isInBorder(x, y) && mouseButton == 0) {
+            if (System.currentTimeMillis() - prevClick <= 250L)
+                editMode = true
+
+            prevClick = System.currentTimeMillis()
+        } else {
+            editMode = false
+        }
+    }
+
+    override fun handleKey(c: Char, keyCode: Int) {
+        if (editMode && mc.currentScreen is GuiHudDesigner) {
+            if (keyCode == Keyboard.KEY_BACK) {
+                if (displayString.isNotEmpty())
+                    displayString = displayString.dropLast(1)
+
+                updateElement()
+                return
+            }
+
+            if (ColorUtils.isAllowedCharacter(c) || c == '§')
+                displayString += c
+
+            updateElement()
+        }
+    }
+}
+result.append(replacement)
                             lastPercent = -1
                             continue
                         }
